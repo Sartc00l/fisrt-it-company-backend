@@ -1,10 +1,9 @@
 from django_filters import rest_framework as filters
 from .models import Transaction
 
-
 class TransactionFilter(filters.FilterSet):
-    date_from = filters.DateFilter(field_name="date", lookup_expr="gte")
-    date_to = filters.DateFilter(field_name="date", lookup_expr="lte")
+    start_date = filters.DateFilter(field_name="date", lookup_expr="gte")
+    end_date = filters.DateFilter(field_name="date", lookup_expr="lte")
     status = filters.NumberFilter(field_name="status_id")
     type = filters.NumberFilter(field_name="type_id")
     category = filters.NumberFilter(field_name="category_id")
@@ -12,4 +11,4 @@ class TransactionFilter(filters.FilterSet):
 
     class Meta:
         model = Transaction
-        fields = ['date_from', 'date_to', 'status', 'type', 'category', 'subcategory']
+        fields = ['start_date', 'end_date', 'status', 'type', 'category', 'subcategory']
