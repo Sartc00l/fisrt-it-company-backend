@@ -1,3 +1,38 @@
-from django.shortcuts import render
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import viewsets
+from api.filters import TransactionFilter
+from api.models import Type, Category, Subcategory, Status, Transaction
+from api.serializers import (
+    TypeSerializer,
+    CategorySerializer,
+    SubcategorySerializer,
+    StatusSerializer,
+    TransactionSerializer,
+)
 
-# Create your views here.
+
+class TypeViewSet(viewsets.ModelViewSet):
+    queryset = Type.objects.all()
+    serializer_class = TypeSerializer
+
+
+class CategoryViewSet(viewsets.ModelViewSet):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+
+
+class SubcategoryViewSet(viewsets.ModelViewSet):
+    queryset = Subcategory.objects.all()
+    serializer_class = SubcategorySerializer
+
+
+class StatusViewSet(viewsets.ModelViewSet):
+    queryset = Status.objects.all()
+    serializer_class = StatusSerializer
+
+
+class TransactionViewSet(viewsets.ModelViewSet):
+    queryset = Transaction.objects.select_related('status', 'type', 'category', 'subcategory').all()
+    serializer_class = TransactionSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = TransactionFilter
