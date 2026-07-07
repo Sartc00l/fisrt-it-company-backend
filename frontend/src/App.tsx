@@ -59,6 +59,8 @@ export default function App() {
   const [newSubcategoryName, setNewSubcategoryName] = useState('');
   const [newSubcategoryCatId, setNewSubcategoryCatId] = useState('');
 
+  const [refErrors, setRefErrors] = useState<{ [key: string]: string }>({});
+
   const initAppData = async (queryParams = '') => {
     try {
       setLoading(true);
@@ -190,16 +192,31 @@ export default function App() {
     clearFields();
   };
 
+  const showRefError = (endpoint: string, message: string) => {
+    setRefErrors(prev => ({ ...prev, [endpoint]: message }));
+    setTimeout(() => {
+      setRefErrors(prev => {
+        const copy = { ...prev };
+        delete copy[endpoint];
+        return copy;
+      });
+    }, 5000);
+  };
+
   const handleDeleteReference = async (endpoint: string, id: number) => {
-    if (!confirm('Удалить этот элемент справочника? Это может затронуть связанные транзакции.')) return;
+    if (!confirm('Удалить этот элемент справочника?')) return;
     try {
       await api.delete(`/${endpoint}/${id}/`);
       if (editingRef && editingRef.endpoint === endpoint && editingRef.id === id) {
         setEditingRef(null);
       }
       initAppData();
-    } catch (err) {
-      console.error(err);
+    } catch (err: any) {
+      if (err.response && err.response.status === 500) {
+        showRefError(endpoint, 'Нельзя удалить: элемент используется в существующих транзакциях');
+      } else {
+        showRefError(endpoint, 'Ошибка при удалении элемента справочника');
+      }
     }
   };
 
@@ -399,6 +416,9 @@ export default function App() {
               <h3 className="text-lg font-semibold text-white m-0">
                 {editingRef && editingRef.endpoint === 'statuses' ? `Правка статуса ID ${editingRef.id}` : 'Статусы'}
               </h3>
+              {refErrors.statuses && (
+                <div className="bg-red-950/40 border border-red-900/50 text-red-400 text-xs px-3 py-2 rounded-lg font-medium">{refErrors.statuses}</div>
+              )}
               <div className="flex gap-2">
                 <input type="text" placeholder="Название статуса" value={newStatusName} onChange={e => setNewStatusName(e.target.value)} className="flex-1 bg-[#16171d] border border-gray-700 rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none" />
                 <button onClick={() => handleSaveReference('statuses', { name: newStatusName }, () => setNewStatusName(''))} className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-1.5 rounded-lg text-sm font-medium transition-colors cursor-pointer">
@@ -425,6 +445,9 @@ export default function App() {
               <h3 className="text-lg font-semibold text-white m-0">
                 {editingRef && editingRef.endpoint === 'types' ? `Правка типа ID ${editingRef.id}` : 'Типы операций'}
               </h3>
+              {refErrors.types && (
+                <div className="bg-red-950/40 border border-red-900/50 text-red-400 text-xs px-3 py-2 rounded-lg font-medium">{refErrors.types}</div>
+              )}
               <div className="flex gap-2">
                 <input type="text" placeholder="Название типа" value={newTypeName} onChange={e => setNewTypeName(e.target.value)} className="flex-1 bg-[#16171d] border border-gray-700 rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none" />
                 <button onClick={() => handleSaveReference('types', { name: newTypeName }, () => setNewTypeName(''))} className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-1.5 rounded-lg text-sm font-medium transition-colors cursor-pointer">
@@ -451,6 +474,9 @@ export default function App() {
               <h3 className="text-lg font-semibold text-white m-0">
                 {editingRef && editingRef.endpoint === 'categories' ? `Правка категории ID ${editingRef.id}` : 'Категории'}
               </h3>
+              {refErrors.categories && (
+                <div className="bg-red-950/40 border border-red-900/50 text-red-400 text-xs px-3 py-2 rounded-lg font-medium">{refErrors.categories}</div>
+              )}
               <div className="space-y-2">
                 <select value={newCategoryTypeId} onChange={e => setNewCategoryTypeId(e.target.value)} className="w-full bg-[#16171d] border border-gray-700 rounded-lg px-2 py-1.5 text-sm text-white focus:outline-none">
                   {types.map(t => <option key={t.id} value={t.id}>Связанный тип: {t.name}</option>)}
@@ -485,6 +511,9 @@ export default function App() {
               <h3 className="text-lg font-semibold text-white m-0">
                 {editingRef && editingRef.endpoint === 'subcategories' ? `Правка подкатегории ID ${editingRef.id}` : 'Подкатегории'}
               </h3>
+              {refErrors.subcategories && (
+                <div className="bg-red-950/40 border border-red-900/50 text-red-400 text-xs px-3 py-2 rounded-lg font-medium">{refErrors.subcategories}</div>
+              )}
               <div className="space-y-2">
                 <select value={newSubcategoryCatId} onChange={e => setNewSubcategoryCatId(e.target.value)} className="w-full bg-[#16171d] border border-gray-700 rounded-lg px-2 py-1.5 text-sm text-white focus:outline-none">
                   {categories.map(c => <option key={c.id} value={c.id}>Связанная кат.: {c.name}</option>)}

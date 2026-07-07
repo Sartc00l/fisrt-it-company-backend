@@ -27,9 +27,18 @@ class StatusSerializer(serializers.ModelSerializer):
 
 
 class TransactionSerializer(serializers.ModelSerializer):
+    status_details = StatusSerializer(source='status', read_only=True)
+    type_details = TypeSerializer(source='type', read_only=True)
+    category_details = CategorySerializer(source='category', read_only=True)
+    subcategory_details = SubcategorySerializer(source='subcategory', read_only=True)
+
     class Meta:
         model = Transaction
-        fields = '__all__'
+        fields = [
+            'id', 'date', 'amount', 'comment', 
+            'status', 'type', 'category', 'subcategory',
+            'status_details', 'type_details', 'category_details', 'subcategory_details'
+        ]
 
     def validate(self, attrs):
         transaction_type = attrs.get('type')
