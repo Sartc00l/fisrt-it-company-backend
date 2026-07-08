@@ -1,101 +1,93 @@
-```markdown
-# ДДС Панель — Веб-сервис для управления движением денежных средств
+# Cash Flow Dashboard — Financial Management Web Service
 
-## 🛠 Технологический стек
+A full-stack web application designed for cash flow tracking, operational financial accounting, and transaction lifecycle management.
+
+## 🛠 Tech Stack
 
 * **Frontend:** React, TypeScript, Vite, Tailwind CSS
 * **Backend:** Python 3.12, Django, Django REST Framework (DRF)
-* **База данных:** PostgreSQL
-* **Управление зависимостями:** Poetry (Backend), npm (Frontend)
-* **Окружение:** Docker, Docker Compose
+* **Database:** PostgreSQL
+* **Dependency Management:** Poetry (Backend), npm (Frontend)
+* **Containerization:** Docker, Docker Compose
 
 ---
 
-## 🚀 Функциональные возможности
+## 🚀 Key Features
 
-* **Учет операций (ДДС):** Создание, просмотр, редактирование и удаление (CRUD) записей о движении средств.
-* **Динамические справочники:** Полное управление (CRUD) Статусами, Типами операций, Категориями и Подкатегориями.
-* **Строгие бизнес-правила (Каскад):** * Категории жестко привязаны к Типам (например, категория «Маркетинг» доступна только для типа «Списание»).
-    * Подкатегории привязаны к Категориям («VPS» доступен только внутри категории «Инфраструктура»).
-    * Динамическая фильтрация и валидация как на стороне клиента (React), так и на стороне сервера (Django REST).
-* **Фильтрация и поиск:** Продвинутый поиск по диапазону дат, статусам, типам, категориям и подкатегориям одновременно.
-* **Предустановленные данные:** Автоматическая初始化 базы данных базовыми справочниками (fixtures) при первом запуске контейнеров.
+* **Transaction Accounting:** Full CRUD operations for financial records and cash movements.
+* **Dynamic Reference Books:** Complete CRUD lifecycle management for Transaction Statuses, Types, Categories, and Subcategories.
+* **Cascading Business Logic & Integrity:**
+  * Strict parent-child bindings (e.g., the *Marketing* category is exclusively available under the *Expense* operation type; *VPS* is restricted to the *Infrastructure* category).
+  * Dual-layer dynamic filtering and validation on both the client (React state machines) and the server (DRF Serializers).
+* **Multi-Parameter Filtering & Search:** Advanced search filtering across date ranges, transaction types, statuses, categories, and subcategories simultaneously.
 
 ---
 
-## 📁 Структура репозитория
+## 📁 Repository Structure
 
 ```text
 .
-├── backend/                  # Django-приложение (Бэкенд)
-│   ├── api/                  # Приложение с бизнес-логикой
-│   │   ├── fixtures/         # Первоначальные данные для справочников (initial_data.json)
+├── backend/                  # Django Application (Core API)
+│   ├── api/                  # Business logic domain
+│   │   ├── fixtures/         # Initial seeding data (initial_data.json)
 │   │   ├── migrations/
 │   │   ├── admin.py
 │   │   ├── apps.py
-│   │   ├── filters.py        # Кастомная фильтрация транзакций для API
-│   │   ├── models.py         # Описание таблиц БД (Транзакции, Справочники)
-│   │   ├── serializers.py    # Валидация данных и связь БД -> JSON (DRF)
+│   │   ├── filters.py        # Custom API transaction filters
+│   │   ├── models.py         # ORM models (Transactions, References)
+│   │   ├── serializers.py    # Request validation & serialization (DRF)
 │   │   ├── tests.py
-│   │   └── views.py          # Обработчики запросов (Вьюсеты API)
-│   ├── config/               # Настройки проекта Django
-│   │   ├── settings.py       # Главный конфигурационный файл бэкенда
-│   │   └── urls.py           # Корневой роутинг URL-адресов API
+│   │   └── views.py          # ViewSets and API routing handlers
+│   ├── config/               # Project configuration root
+│   │   ├── settings.py       # Core settings module
+│   │   └── urls.py           # Root URL dispatching
 │   ├── Dockerfile
 │   └── manage.py
-├── frontend/                 # React-приложение (Фронтенд)
+├── frontend/                 # React Application (SPA)
 │   ├── public/
-│   ├── src/                  # Исходный код интерфейса
+│   ├── src/
 │   │   ├── assets/
-│   │   ├── App.tsx           # Главный компонент (интерфейс, каскадные формы, таблицы)
-│   │   ├── api.ts            # Клиент для отправки HTTP-запросов к Django API
+│   │   ├── App.tsx           # Main application shell (cascading forms & data tables)
+│   │   ├── api.ts            # Typed HTTP client for Django REST API
 │   │   ├── index.css
 │   │   └── main.tsx
 │   ├── Dockerfile
 │   ├── index.html
-│   ├── nginx.conf            # Конфигурация Nginx для раздачи статики и проксирования API
+│   ├── nginx.conf            # Reverse proxy & static assets server
 │   ├── package-lock.json
 │   ├── package.json
 │   ├── postcss.config.js
 │   ├── tailwind.config.js
 │   ├── tsconfig.json
 │   └── vite.config.ts
-├── docker-compose.yml        # Оркестрация контейнеров
+├── docker-compose.yml        # Multi-container orchestration
 ├── poetry.lock
-└── pyproject.toml            # Список зависимостей бэкенда для Poetry
+└── pyproject.toml            # Poetry backend dependencies
 
+⚠️ Note: When running via docker-compose, ensure DB_HOST is set to db (the database service name within the Docker internal bridge network). For standalone local development, switch this value to localhost.
+
+💻 Quick Start (Docker Compose)
+
+The fastest way to spin up the entire application stack in an isolated, production-like environment.
+1. Clone the repository
 ```
-
----
-
-
-> ⚠️ **Важно:** При запуске через `docker-compose` переменная `DB_HOST` должна быть равна `db` (имя сервиса базы данных в сети Docker). При локальном запуске (без Docker) замените её на `localhost`.
-
----
-
-## 💻 Быстрый запуск (Через Docker Compose)
-
-Самый простой и быстрый способ развернуть проект в production-ready окружении со всеми зависимостями.
-
-### 1. Клонирование репозитория
-
-```bash
 git clone https://github.com/Sartc00l/fisrt-it-company-backend
 cd fisrt-it-company-backend
+```
+
+2. Configure Environment Variables
+
+Create a root .env configuration file:
 
 ```
-### 2. Переменные окружения(.env)
-Для работы приложения (как в Docker, так и локально) используется файл конфигурации `.env`. Создайте в корневой директории проекта файл `.env` для этого выполните :
-
-```bash
 cat << 'EOF' > .env
-# Django настройки
+# Django Settings
 SECRET_KEY=django-insecure-local-dev-super-secret-key-2026
 DEBUG=True
 DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1,web
-CORS_ALLOWED_ORIGINS=http://localhost:5173,http://127.0.0.1:5173
+CORS_ALLOWED_ORIGINS=http://localhost:5173,[http://127.0.0.1:5173](http://127.0.0.1:5173),http://localhost:3000
 
-# Настройки PostgreSQL
+# PostgreSQL Settings
 DB_NAME=dds_db
 DB_USER=dds_user
 DB_PASSWORD=dds_pass
@@ -104,87 +96,51 @@ DB_PORT=5432
 EOF
 ```
 
-### 3. Сборка и запуск контейнеров
+3. Build & Run
 
-Запустите команду в корневой директории проекта. Она автоматически поднимет базу данных PostgreSQL, применит миграции, загрузит базовые справочники из фикстур и запустит серверы бэкенда и фронтенда:
+Run the orchestration command in the root folder. It provisions the PostgreSQL instance, runs migrations, seeds initial data from fixtures, and launches both backend and frontend containers:
 
-``` bash
-docker-compose up -d --build
+`docker compose up -d --build`
 
-```
+4. Verification & Endpoints
 
-### 4. Проверка работы
+Once initialized, services are available at:
 
-После успешной сборки и запуска приложение будет доступно по адресам:
+    Frontend Client: http://localhost:3000
 
-* **Frontend:** `http://localhost:3000`
-* **Backend API Swagger/Интерфейс:** `http://localhost:8000/api/`
+    Backend API / Swagger UI: http://localhost:8000/api/
 
----
+🛠 Local Development (Bare Metal)
 
-## 🛠 Локальная разработка (Без Docker)
+Manual setup guide without Docker for debugging or local profiling.
+Backend (Django)
 
-Если вам необходимо запустить компоненты локально для отладки или разработки.
+    1. Ensure Poetry is installed.
 
-### Бэкенд (Django)
+    2. Install dependencies:
+    ```
+    cd backend
+    poetry install
+    ```
+    3. Activate the environment and execute database migrations:
+    ```
+    poetry shell
+    python manage.py migrate
+    ```
+    4. Seed initial fixtures:
+    `python manage.py loaddata api/fixtures/initial_data.json`
+    5. Start development server:
+    `python manage.py runserver`
+Frontend (React)
+    1. Navigate to the frontend directory:
+    `cd frontend`
+    2. Install dependencies:
+    `npm install`
+    3. Start Vite dev server:
+    `npm run dev`
 
-1. Убедитесь, что у вас установлен [Poetry] (https://python-poetry.org/).
-2. Перейдите в папку бэкенда и установите зависимости:
+🔒 Data Validation & Business Constraints
 
-```bash
-cd backend
-poetry install
+    Mandatory Input Fields: Amount, Type, Category, and Subcategory undergo rigorous validation both client-side (blocking illegal submission states) and server-side (serializers.ValidationError), returning structured error payloads.
 
-```
-
-3. Активируйте виртуальное окружение и примените миграции (предварительно настроив подключение к вашей локальной БД в `settings.py` или используя переменные окружения):
-
-```bash
-poetry shell
-python manage.py migrate
-
-```
-
-4. Загрузите начальные фикстуры для справочников:
-
-```bash
-python manage.py loaddata api/fixtures/initial_data.json
-
-```
-
-5. Запустите сервер разработки Django:
-
-```bash
-python manage.py runserver
-
-```
-
-### Фронтенд (React)
-
-1. Перейдите в папку фронтенда:
-
-```bash
-cd frontend
-
-```
-
-2. Установите npm-зависимости:
-
-```bash
-npm install
-
-```
-
-3. Запустите локальный сервер разработки Vite:
-
-```bash
-npm run dev
-
-```
-
----
-
-## 🔒 Валидация и Бизнес-правила
-
-1. **Обязательные поля:** При создании транзакции поля `Сумма`, `Тип`, `Категория` и `Подкатегория` жестко валидируются на фронтенде (блокировка отправки некорректной формы) и на бэкенде (`serializers.ValidationError`), возвращая информативные ошибки.
-2. **Целостность связей:** Если через API попытаться отправить `Категорию`, которая не принадлежит выбранному `Типу`, сервер отклонит запрос. Это гарантирует стопроцентную чистоту данных в PostgreSQL.
+    Relational Integrity Enforcement: Submitting a Category that does not belong to the selected Type via raw API payload is immediately rejected by the backend. This guarantees zero orphaned relations and absolute data consistency in PostgreSQL.
