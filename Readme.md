@@ -63,7 +63,7 @@
 ├── poetry.lock
 └── pyproject.toml            # Список зависимостей бэкенда для Poetry
 
-
+```
 ---
 
 
